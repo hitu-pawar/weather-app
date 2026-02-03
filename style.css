@@ -281,3 +281,50 @@ body {
   box-shadow: 0 0 25px rgba(0, 255, 200, 0.6);
   transition: 0.3s;
 }
+
+/* -----------------------------
+   SEARCH ICON FIX (ADDED NEW)
+------------------------------ */
+
+/* Default search icon improved */
+.search button img {
+  width: 20px;
+  filter: brightness(0.2);
+  transition: 0.3s;
+}
+
+/* Hover effect */
+.search button:hover img {
+  transform: scale(1.15);
+}
+
+/* MOBILE Search Icon */
+@media (max-width: 600px) {
+  .search button img {
+    width: 22px;
+    filter: brightness(0.3);
+  }
+}
+
+/* DARK MODE Search Icon */
+.dark .search button img {
+  filter: brightness(0) invert(1);
+}
+
+/* Dark Mode Toggle Mobile Fix */
+@media (max-width: 600px) {
+  .theme-toggle {
+    top: 15px;
+    right: 15px;
+    transform: scale(0.85);
+  }
+}
+/* Enhance card gradient smoothness */
+.card {
+  backdrop-filter: blur(4px);
+}
+
+/* Dark mode card shadow fix */
+.dark .card:hover {
+  box-shadow: 0 0 35px rgba(0, 255, 200, 0.8);
+}
