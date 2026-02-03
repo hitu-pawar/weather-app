@@ -8,6 +8,13 @@
   </head>
 
   <body>
+
+  
+    <div class="theme-toggle">
+      <input type="checkbox" id="toggleDark">
+      <label for="toggleDark" class="toggleSwitch"></label>
+    </div>
+
     <div class="card">
       <div class="search">
         <input type="text" placeholder="Enter City Name" spellcheck="false" />
@@ -54,7 +61,33 @@
       const searchBtn = document.querySelector(".search button");
       const weatherIcon = document.querySelector(".weather-icon");
 
-      // MAIN WEATHER FUNCTION
+      // FUNCTION: UPDATE UI
+      function updateUI(data) {
+        document.querySelector(".city").innerHTML = data.name;
+        document.querySelector(".temp").innerHTML =
+          Math.round(data.main.temp) + "°C";
+        document.querySelector(".humidity").innerHTML =
+          data.main.humidity + "%";
+        document.querySelector(".wind").innerHTML =
+          Math.round(data.wind.speed * 3.6) + " km/h";
+
+        let main = data.weather[0].main;
+        weatherIcon.src =
+          main === "Clouds"
+            ? "img/clouds.png"
+            : main === "Clear"
+            ? "img/clear.png"
+            : main === "Rain"
+            ? "img/rain.png"
+            : main === "Drizzle"
+            ? "img/drizzle.png"
+            : "img/mist.png";
+
+        document.querySelector(".weather").style.display = "block";
+        document.querySelector(".error").style.display = "none";
+      }
+
+      // FUNCTION: CHECK CITY WEATHER
       async function checkWeather(city) {
         if (city.trim() === "") {
           document.querySelector(".error").style.display = "block";
@@ -76,65 +109,54 @@
         updateUI(data);
       }
 
-      // UPDATE UI FUNCTION (COMMON)
-      function updateUI(data) {
-        document.querySelector(".city").innerHTML = data.name;
-        document.querySelector(".temp").innerHTML =
-          Math.round(data.main.temp) + "°C";
-        document.querySelector(".humidity").innerHTML =
-          data.main.humidity + "%";
-        document.querySelector(".wind").innerHTML =
-          Math.round(data.wind.speed * 3.6) + " km/h";
+      searchBtn.addEventListener("click", () => checkWeather(searchBox.value));
+      searchBox.addEventListener("keyup", (e) => {
+        if (e.key === "Enter") checkWeather(searchBox.value);
+      });
 
-        // WEATHER ICON FIX
-        const main = data.weather[0].main;
-        if (main === "Clouds") weatherIcon.src = "img/clouds.png";
-        else if (main === "Clear") weatherIcon.src = "img/clear.png";
-        else if (main === "Rain") weatherIcon.src = "img/rain.png";
-        else if (main === "Drizzle") weatherIcon.src = "img/drizzle.png";
-        else if (main === "Mist") weatherIcon.src = "img/mist.png";
+      // FUNCTION: GET WEATHER BY LOCATION (WITH ERROR HANDLING)
+      function getWeatherByLocation() {
+        if (!navigator.geolocation) {
+          alert("Your device does not support location.");
+          return;
+        }
 
-        document.querySelector(".weather").style.display = "block";
-        document.querySelector(".error").style.display = "none";
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+
+            fetch(
+              `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${apiKey}`
+            )
+              .then((res) => res.json())
+              .then((data) => updateUI(data));
+          },
+          (error) => {
+            if (error.code === error.PERMISSION_DENIED) {
+              alert("❗ Please allow location access from browser settings.");
+            } else {
+              alert("Unable to fetch your location. Try again!");
+            }
+          }
+        );
       }
 
-      // CLICK SEARCH BUTTON
-      searchBtn.addEventListener("click", () => {
-        checkWeather(searchBox.value);
+      // AUTO LOCATION ON LOAD
+      getWeatherByLocation();
+
+      // BUTTON CLICK LOCATION
+      document
+        .getElementById("myLocation")
+        .addEventListener("click", getWeatherByLocation);
+
+
+      
+      let toggle = document.getElementById("toggleDark");
+
+      toggle.addEventListener("change", () => {
+        document.body.classList.toggle("dark");
       });
 
-      // ENTER KEY SEARCH
-      searchBox.addEventListener("keyup", (e) => {
-        if (e.key === "Enter") {
-          checkWeather(searchBox.value);
-        }
-      });
-
-      // AUTO LOCATION FETCH ON PAGE LOAD
-      navigator.geolocation.getCurrentPosition((position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-
-        fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`
-        )
-          .then((res) => res.json())
-          .then((data) => updateUI(data));
-      });
-
-      // BUTTON: MY LOCATION WEATHER
-      document.getElementById("myLocation").addEventListener("click", () => {
-        navigator.geolocation.getCurrentPosition((position) => {
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-
-          fetch(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`
-          )
-            .then((res) => res.json())
-            .then((data) => updateUI(data));
-        });
-      });
     </script>
   </body>
 </html>
